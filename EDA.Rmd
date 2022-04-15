@@ -1,0 +1,119 @@
+---
+title: "Notebook"
+author: "Hrithik Chauhan"
+date: "08/04/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, warning=FALSE}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(ggthemes)) 
+suppressPackageStartupMessages(library(plotly))
+suppressPackageStartupMessages(library(highcharter))
+suppressPackageStartupMessages(library(corrplot))
+col1 <- '#FF8B03'
+col2 <- '#20BEFF'
+col3 <- '#1DB954'
+col4 <- '#FF0000'
+```
+
+Let’s see the first few rows of the data file and also glimpse the data file. 
+
+```{r input, message=FALSE, warning=FALSE}
+df <- read_csv("consolidated_coin_data.csv")
+```
+The data includes 83,156 rows and 8 columns.
+
+### Column Names
+
+```{r}
+names(df)
+```
+
+### Unique Cryptocurrencies in the Dataset 
+
+There are 12 unique cryptocurrencies.
+
+```{r}
+unique(df$Currency)
+```
+
+### Potential Questions to be Answered
+
+* Cryptocurrency distribution on basis of Trading Volume
+* Cryptocurrency distribution on basis of Market Cap
+* Correlation between Market Capitalization and Close Price
+* Correlation between Trading Volume and Close Price
+
+### Analysis
+
+### Trading Volume Distribution
+
+Tether and Bitcoin got the highest trading volume. And, below is the visualization of distribution;
+
+```{r}
+df  %>% 
+  arrange(desc(Volume)) %>% 
+  select(one_of('Currency','Volume')) %>% 
+  hchart('bar',hcaes(Currency, Volume),
+          color = col3) %>% 
+  hc_title(text = "Cryptocurrency distribution on basis of Trading Volume") %>% 
+  hc_add_theme(hc_theme_darkunica())
+```
+### Market Capitalization Distribution
+
+Bitcoin and Ethereum got the highest market capitalization. And, below is the visualization of distribution;
+
+```{r}
+df  %>% 
+  arrange(desc(`Market_Cap`)) %>% 
+  select(one_of('Currency','Market_Cap')) %>% 
+  hchart('bar',hcaes(Currency, Market_Cap),
+          color = col4) %>% 
+  hc_title(text = "Cryptocurrency distribution on basis of Market Capitalization") %>%
+  hc_add_theme(hc_theme_darkunica())
+```
+### Correlation Analysis
+
+### Correlation between Market Cap and Close Prices of Cryptocurrency
+
+```{r}
+df %>% 
+  select(c('Market_Cap', 'Close')) %>% 
+  cor()
+```
+### Correlation between Trading Volume and Close Prices of Cryptocurrency
+
+```{r}
+df %>% 
+  select(c('Volume', 'Close')) %>% 
+  cor()
+```
+### Visualization (Scatter Plot)
+
+```{r}
+df %>% 
+  select(c('Market_Cap', 'Close')) %>% 
+  ggplot(aes(x = Close, y = Market_Cap)) + 
+  geom_point( color= col1) +
+  geom_smooth(method = lm) +
+  labs(title = 'Market Capitalization and Close Prices are Highly Correlated') +
+  ggthemes::theme_few() -> ggrest
+plotly::ggplotly(ggrest)
+```
+
+```{r}
+df %>% 
+  select(c('Volume', 'Close')) %>% 
+  ggplot(aes(x = Volume, y = Close)) + 
+  geom_point(color= '#FF8B03') +
+  geom_smooth(method = lm) +
+  labs(title = 'Trading Volume and Close Price of are Significantly Correlated') + ggthemes::theme_few() -> ggrest1
+plotly::ggplotly(ggrest1)
+```
+
+### Thank you! You have reached to end of the analysis. 
